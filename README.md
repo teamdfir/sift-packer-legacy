@@ -1,3 +1,5 @@
+[![Logo](https://digital-forensics.sans.org/images/sift.png)
+
 # SIFT Packer Scripts
 
 These scripts build out the community SIFT ova file.
