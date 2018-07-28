@@ -1,10 +1,12 @@
 #!/bin/bash -eux
 
-# Uninstall Ansible and remove PPA.
-#apt-get -y remove --purge ansible
-#apt-add-repository --remove ppa:ansible/ansible
-# TODO: BUG AUTOREMOVE removes python-plaso?!
-# apt-get autoremove
+# Remove VMWare Tools
+rm -rf /home/sansforensics/linux.iso
+
+# Remove Fonts that require License Agreement
+apt-get remove -y ttf-mscorefonts-installer
+
+# Make sure everything is up to date.
 apt-get update
 
 # Zero out the rest of the free space using dd, then delete the written file.

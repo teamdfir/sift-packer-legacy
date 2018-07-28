@@ -1,19 +1,20 @@
 #!/bin/bash -eux
 
-SSH_USERNAME=${SSH_USERNAME:-vagrant}
-
 function install_open_vm_tools {
     echo "==> Installing Open VM Tools"
     # Install open-vm-tools so we can mount shared folders
-    apt-get install -y open-vm-tools
+    apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" open-vm-tools open-vm-tools-desktop
     # Add /mnt/hgfs so the mount works automatically with Vagrant
     mkdir -p /mnt/hgfs
 }
 
 function install_vmware_tools {
+    apt-get purge -y open-vm-tools
+    mkdir -p /mnt/hgfs
+
     echo "==> Installing VMware Tools"
     # Assuming the following packages are installed
-    apt-get install -y linux-headers-$(uname -r) build-essential perl
+    # apt-get install -y linux-headers-$(uname -r) build-essential perl
 
     cd /tmp
     mkdir -p /mnt/cdrom
@@ -44,22 +45,8 @@ function install_vmware_tools {
     echo "==> Installed VMware Tools ${VMWARE_TOOLBOX_CMD_VERSION}"
 }
 
+
+
 if [[ $PACKER_BUILDER_TYPE =~ vmware ]]; then
-    KERNEL_VERSION=$(uname -r | cut -d. -f1-2)
-    echo "==> Kernel version ${KERNEL_VERSION}"
-    MAJOR_VERSION=$(echo ${KERNEL_VERSION} | cut -d '.' -f1)
-    MINOR_VERSION=$(echo ${KERNEL_VERSION} | cut -d '.' -f2)
-    if [ "${MAJOR_VERSION}" -ge "4" ] && [ "${MINOR_VERSION}" -ge "1" ]; then
-      # open-vm-tools supports shared folders on kernel 4.1 or greater
-      . /etc/lsb-release
-      if [[ $DISTRIB_RELEASE == 14.04 || $DISTRIB_RELEASE == 16.04 ]]; then
-        install_vmware_tools
-        # Ensure that VMWare Tools recompiles kernel modules
-        echo "answer AUTO_KMODS_ENABLED yes" >> /etc/vmware-tools/locations
-      else 
-        install_open_vm_tools
-      fi
-    else
-      install_vmware_tools
-    fi 
+  install_open_vm_tools
 fi
