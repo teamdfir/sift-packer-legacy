@@ -2,22 +2,24 @@
   "_comment": "Build with `packer build ubuntu.json`",
   "builders": [
     {
-      "type": "vmware-vmx",
-      "headless": "{{ user `headless` }}",
-      "http_directory": "http",
-      "output_directory": "./_virtuals/sift-{{ user `distro` }}.vmwarevm",
-      "shutdown_command": "echo '{{ user `ssh_password` }}'|sudo -S shutdown -P now",
-      "ssh_password": "{{ user `ssh_password` }}",
-      "ssh_username": "{{ user `ssh_username` }}",
-      "ssh_wait_timeout": "10000s",
-      "ssh_pty": false,
-      "tools_upload_flavor": "linux",
-      "source_path": "./_virtuals/preflight-{{ user `distro` }}.vmwarevm/preflight.vmx",
-      "vm_name": "sift-workstation",
-      "vmx_data": {
-        "memsize": "{{ user `memory` }}",
-        "numvcpus": "{{ user `cpus` }}"
-      }
+      "type": "amazon-ebs",
+      "region": "us-west-2",
+      "source_ami": "ami-06f2f779464715dc5",
+      "instance_type": "m4.xlarge",
+      "ssh_username": "sansforensics",
+      "ami_name": "sift-{{isotime \"2006-01-02-1504\"}}",
+      "user_data_file": "aws/cloud-config.yaml",
+      "ami_groups": [
+        "all"
+      ],
+      "launch_block_device_mappings": [
+        {
+          "device_name": "/dev/sda1",
+          "volume_type": "gp2",
+          "volume_size": "20",
+          "delete_on_termination": true
+        }
+      ]
     }
   ],
   "provisioners": [
@@ -32,22 +34,22 @@
         "ftp_proxy={{user `ftp_proxy`}}",
         "rsync_proxy={{user `rsync_proxy`}}",
         "no_proxy={{user `no_proxy`}}",
-        "SIFT_VERSION={{user `sift_version`}}",
-        "DISTRO={{user `distro`}}"
+        "SIFT_VERSION={{user `sift_version`}}"
       ],
       "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
       "scripts": [
         "scripts/prepare.sh",
-        "scripts/update.sh"
+        "scripts/update.sh",
+        "scripts/saltstack.sh"
       ],
       "type": "shell"
     },
     {
       "type": "salt-masterless",
-      "local_state_tree": "sift-saltstack",
+      "local_state_tree": "/Users/ekristen/Development/sift/sift-saltstack",
       "skip_bootstrap": true,
-      "custom_state": "sift.vm",
-      "salt_call_args": "--state-output=terse"
+      "custom_state": "sift.server",
+      "salt_call_args": "-l debug --state-output=terse"
     },
     {
       "environment_vars": [
@@ -59,11 +61,11 @@
         "ftp_proxy={{user `ftp_proxy`}}",
         "rsync_proxy={{user `rsync_proxy`}}",
         "no_proxy={{user `no_proxy`}}",
-        "SIFT_VERSION={{user `sift_version`}}",
-        "DISTRO={{user `distro`}}"
+        "SIFT_VERSION={{user `sift_version`}}"
       ],
       "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
       "scripts": [
+        "scripts/cloud-config.sh",
         "scripts/minimize.sh",
         "scripts/cleanup.sh"
       ],
@@ -76,7 +78,6 @@
     "ssh_username": "sansforensics",
     "ssh_password": "forensics",
     "hostname": "siftworkstation",
-    "distro": "focal",
     "cpus": "2",
     "memory": "2048",
     "cleanup_pause": "",

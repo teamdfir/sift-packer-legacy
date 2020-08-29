@@ -33,11 +33,13 @@
         "ftp_proxy={{user `ftp_proxy`}}",
         "rsync_proxy={{user `rsync_proxy`}}",
         "no_proxy={{user `no_proxy`}}",
-        "SIFT_VERSION={{user `sift_version`}}"
+        "SIFT_VERSION={{user `sift_version`}}",
+        "DISTRO={{user `distro`}}"
       ],
       "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
       "scripts": [
-        "scripts/clean-saltstack.sh"
+        "scripts/clean-saltstack.sh",
+        "scripts/fix-pyopenssl.sh"
       ],
       "type": "shell"
     },
@@ -60,11 +62,11 @@
         "ftp_proxy={{user `ftp_proxy`}}",
         "rsync_proxy={{user `rsync_proxy`}}",
         "no_proxy={{user `no_proxy`}}",
-        "SIFT_VERSION={{user `sift_version`}}"
+        "SIFT_VERSION={{user `sift_version`}}",
+        "DISTRO={{user `distro`}}"
       ],
       "execute_command": "echo '{{ user `ssh_password` }}' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
       "scripts": [
-        "scripts/update2.sh",
         "scripts/clean-saltstack.sh",
         "scripts/minimize.sh",
         "scripts/cleanup.sh"
@@ -73,11 +75,12 @@
     }
   ],
   "variables": {
-    "headless": "true",
+    "headless": "false",
     "sift_version": "stable",
     "ssh_username": "sansforensics",
     "ssh_password": "forensics",
     "hostname": "siftworkstation",
+    "distro": "focal",
     "cpus": "2",
     "memory": "2048",
     "cleanup_pause": "",
