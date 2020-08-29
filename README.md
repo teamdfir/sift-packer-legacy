@@ -1,4 +1,4 @@
-[![Logo](https://digital-forensics.sans.org/images/sift.png)
+![Logo](https://digital-forensics.sans.org/images/sift.png)
 
 # SIFT Packer Scripts
 
